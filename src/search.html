@@ -1,4 +1,4 @@
-<h1>Search</h1>
+<h1>Buscar</h1>
 
 <div class="mb-3">
     <input type="text" class="form-control" id="searchInput" placeholder="Búsqueda por matrícula, nombre, región, departamento, período, proyecto o campus">
@@ -20,17 +20,34 @@
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <th scope="row">A01234567</th>
-            <td>Raúl NG</td>
-            <td>Tampico, Madero y Altamira</td>
-            <td>General</td>
-            <td>2021-II</td>
-            <td>DataAnalitics, Web Develpment, and Programming Challenge</td>
-            <td>CCM</td>
-            <td><button type="button" class="btn btn-outline-dark">Editar</button></td>
-            <td><button type="button" class="btn btn-outline-primary">Exportar</button></td>
-            <td><button type="button" class="btn btn-outline-danger">Eliminar</button></td>
-        </tr>
+        
     </tbody>
 </table>
+
+<template id="rowTemplate">
+    <tr>
+        <th class="matricula" scope="row"></td>
+        <td class="nombre"></td>
+        <td class="region"></td>
+        <td class="departamento"></td>
+        <td class="periodo"></td>
+        <td class="proyecto"></td>
+        <td class="campus"></td>
+        <td><button type="button" class="btn btn-outline-dark">Editar</button></td>
+        <td><button type="button" class="btn btn-outline-primary">Exportar</button></td>
+        <td><button type="button" class="btn btn-outline-danger">Eliminar</button></td>
+    </tr>
+</template>
+
+<!-- <tr>
+    <th scope="row">A01234567</th>
+    <td>Raúl NG</td>
+    <td>Tampico, Madero y Altamira</td>
+    <td>General</td>
+    <td>2021-II</td>
+    <td>DataAnalitics, Web Develpment, and Programming Challenge</td>
+    <td>CCM</td>
+    <td><button type="button" class="btn btn-outline-dark">Editar</button></td>
+    <td><button type="button" class="btn btn-outline-primary">Exportar</button></td>
+    <td><button type="button" class="btn btn-outline-danger">Eliminar</button></td>
+</tr> -->
