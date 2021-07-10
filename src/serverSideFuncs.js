@@ -13,6 +13,9 @@ function getDataForSearch() {
     });
 }
 
-function prueba() {
-    Logger.log(getDataForSearch());
+function deleteById(id){
+    const workSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Voluntarios");
+    const idColumn = workSheet.getRange(2, 6, workSheet.getLastRow() - 1, 1).getValues().map((row) => {return row[0]});
+    rowPosition = idColumn.indexOf(id) + 2;
+    workSheet.deleteRow(rowPosition === 1 ? 0 : rowPosition);
 }

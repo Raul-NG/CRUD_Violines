@@ -25,7 +25,7 @@
 </table>
 
 <template id="rowTemplate">
-    <tr>
+    <tr class="result-box">
         <th class="id" scope="row"></td>
         <td class="name"></td>
         <td class="region"></td>
@@ -35,6 +35,12 @@
         <td class="campus"></td>
         <td><button type="button" class="btn btn-outline-dark">Editar</button></td>
         <td><button type="button" class="btn btn-outline-primary">Exportar</button></td>
-        <td><button type="button" class="btn btn-outline-danger">Eliminar</button></td>
+        <td>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-danger confirm-button d-none">Confirmar</button>
+            <button type="button" class="btn btn-outline-danger delete-button">Eliminar</button>
+            <button type="button" class="btn btn-outline-secondary cancel-button d-none">Cancelar</button>
+        </div>
+        </td>
     </tr>
 </template>

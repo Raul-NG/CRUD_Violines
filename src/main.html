@@ -79,6 +79,7 @@
         }
 
         function search() {
+            //optimizar, juntar búqueda y despliegue
             var searchInput = document.getElementById("searchInput").value.toString().toLowerCase().trim();
             var searchWords = searchInput.split(/\s+/);
             // and condition
@@ -101,6 +102,7 @@
             if (searchInput === "") return;
             resultsArray.forEach((volunteer) => {
                 var row = template.content.cloneNode(true);
+                row.querySelector(".confirm-button").dataset.volunteerId = volunteer.id;
                 for (let atribute = 0; atribute < COMPARE_ATRIBUTTES.length; atribute++) {
                     // Case sensitive?
                     row.querySelector("." + COMPARE_ATRIBUTTES[atribute]).textContent = volunteer[COMPARE_ATRIBUTTES[atribute]];
@@ -109,14 +111,38 @@
             });
         }
 
+        function displayConfirmation(event){
+            //orden en html: "confirmar", "-eliminar-", "cancelar"
+            event.target.previousElementSibling.classList.remove("d-none"); //show confirm button
+            event.target.nextElementSibling.classList.remove("d-none"); //show cancel button
+            event.target.classList.add("d-none"); //hide delete button
+        }
+
+        function hideConfirmation(event){
+            //orden en html: "confirmar", "eliminar", "-cancelar-"
+            event.target.previousElementSibling.classList.remove("d-none"); //show delete button
+            event.target.previousElementSibling.previousElementSibling.classList.add("d-none"); //hide confirm button
+            event.target.classList.add("d-none"); //hide cancel button
+        }
+
+        function deleteVolunteer(event) {
+            google.script.run.withSuccessHandler(() => {
+                event.target.closest(".result-box").remove();
+            }).deleteById(event.target.dataset.volunteerId);
+        }
+
         function inputEventHandler(event) {
             if (event.target.matches("#searchInput")) search();
+            if (event.target.matches(".delete-button")) displayConfirmation(event);
+            if (event.target.matches(".confirm-button")) deleteVolunteer(event);
+            if (event.target.matches(".cancel-button")) hideConfirmation(event);
         }
 
         document.getElementById("search-link").addEventListener("click", loadSearchView);
         document.getElementById("add-link").addEventListener("click", loadAddVolunteerView);
         document.getElementById("edit-link").addEventListener("click", loadEditVolunteerView);
         document.getElementById("app").addEventListener("input", inputEventHandler);
+        document.getElementById("app").addEventListener("click", inputEventHandler);
     </script>
 </body>
 
