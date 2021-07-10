@@ -47,67 +47,54 @@
         const COMPARE_ATRIBUTTES = ["id", "name", "region", "department", "period", "project", "campus"];
         var DATA;
 
-        function loadView(options) {
-            // Podemos cambiar por parñámetros predefinidos
-            var id = typeof options.id === "undefined" ? "app" : options.id;
-            var callback = typeof options.callback === "undefined" ? () => { } : options.callback;
+        function loadView(view, id = "app") {
             google.script.run.withSuccessHandler((html) => {
                 document.getElementById(id).innerHTML = html;
-                typeof options.params === "undefined" ? callback() : callback(options.params);
-            })[options.func]();
+            }).requestView(view);
         }
 
         function loadSearchView() {
             //Cambiar pestaña activa 
-            loadView({ func: "loadSearchView", callback: setDataForSearch });
-        }
-
-        function loadAddVolunteerView() {
-            //Cambiar pestaña activa 
-            loadView({ func: "loadAddVolunteerView" });
-        }
-
-        function loadEditVolunteerView() {
-            //Cambiar pestaña activa 
-            loadView({ func: "loadEditVolunteerView" });
-        }
-
-        function setDataForSearch() {
+            loadView("search");
             google.script.run.withSuccessHandler((dataReturned) => {
                 DATA = dataReturned.slice();
             }).getDataForSearch();
         }
 
+        function loadAddVolunteerView() {
+            //Cambiar pestaña activa 
+            loadView("add");
+        }
+
+        function loadEditVolunteerView() {
+            //Cambiar pestaña activa 
+            loadView("edit");
+        }
+
         function search() {
-            //optimizar, juntar búqueda y despliegue
-            var searchInput = document.getElementById("searchInput").value.toString().toLowerCase().trim();
+            var searchResultsBox = document.getElementById("searchResults");
+            searchResultsBox.innerHTML = "";
+            const searchInput = document.getElementById("searchInput").value.toString().toLowerCase().trim();
+            if (searchInput === "") return;
+
             var searchWords = searchInput.split(/\s+/);
-            // and condition
-
-            var resultsArray = DATA.filter((volunteer) => {
-
-                if (searchWords.every((word) => {
+            const template = document.getElementById("rowTemplate");
+            
+            DATA.forEach((volunteer) => {
+                if (searchWords.every((word) => { //and condition, no Case sesitive
                     for (let atribute = 0; atribute < COMPARE_ATRIBUTTES.length; atribute++) {
                         if (volunteer[COMPARE_ATRIBUTTES[atribute]].toLowerCase().indexOf(word) != -1) return true;
                     }
                     return false;
-                })) return true;
-
-                return false;
-            });
-
-            var searchResultsBox = document.getElementById("searchResults");
-            var template = document.getElementById("rowTemplate");
-            searchResultsBox.innerHTML = "";
-            if (searchInput === "") return;
-            resultsArray.forEach((volunteer) => {
-                var row = template.content.cloneNode(true);
-                row.querySelector(".confirm-button").dataset.volunteerId = volunteer.id;
-                for (let atribute = 0; atribute < COMPARE_ATRIBUTTES.length; atribute++) {
-                    // Case sensitive?
-                    row.querySelector("." + COMPARE_ATRIBUTTES[atribute]).textContent = volunteer[COMPARE_ATRIBUTTES[atribute]];
+                })){
+                    var row = template.content.cloneNode(true);
+                    row.querySelector(".confirm-button").dataset.volunteerTimeStamp = volunteer.timeStamp;
+                    row.querySelector(".edit-button").dataset.volunteerTimeStamp = volunteer.timeStamp;
+                    for (let atribute = 0; atribute < COMPARE_ATRIBUTTES.length; atribute++) {
+                        row.querySelector("." + COMPARE_ATRIBUTTES[atribute]).textContent = volunteer[COMPARE_ATRIBUTTES[atribute]];
+                    }
+                    searchResultsBox.appendChild(row);
                 }
-                searchResultsBox.appendChild(row);
             });
         }
 
@@ -126,9 +113,16 @@
         }
 
         function deleteVolunteer(event) {
+            const timeStamp = event.target.dataset.volunteerTimeStamp;
             google.script.run.withSuccessHandler(() => {
                 event.target.closest(".result-box").remove();
-            }).deleteById(event.target.dataset.volunteerId);
+                for (let volunteer = 0; volunteer < DATA.length; volunteer++){
+                    if (timeStamp === DATA[volunteer].timeStamp){
+                        DATA.splice(volunteer,1);
+                        break;
+                    }
+                }
+            }).deleteVolunteer(timeStamp);
         }
 
         function inputEventHandler(event) {
@@ -136,6 +130,7 @@
             if (event.target.matches(".delete-button")) displayConfirmation(event);
             if (event.target.matches(".confirm-button")) deleteVolunteer(event);
             if (event.target.matches(".cancel-button")) hideConfirmation(event);
+            if (event.target.matches(".edit-button")) loadEditVolunteerView();
         }
 
         document.getElementById("search-link").addEventListener("click", loadSearchView);

@@ -1,5 +1,5 @@
 class Volunteer{
-    constructor(_id, _name, _region, _department, _period, _project, _campus){
+    constructor(_id, _name, _region, _department, _period, _project, _campus, _timeStamp){
         this.id = _id;
         this.name = _name;
         this.region = _region;
@@ -7,8 +7,8 @@ class Volunteer{
         this.period = _period;
         this.project = _project;
         this.campus = _campus;
+        this.timeStamp = _timeStamp;
 
-        this.registerTimeStamp = "";
         this.ingressType = "";
         this.institutionalEmail = "";
         this.personalEmail = "";
