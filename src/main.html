@@ -11,8 +11,8 @@
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <style>
-        .nav-link{
-            cursor:pointer;
+        .nav-link {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -44,68 +44,79 @@
 
     <script>
 
+        const COMPARE_ATRIBUTTES = ["id", "name", "region", "department", "period", "project", "campus"];
         var DATA;
 
-        function loadView(options){
+        function loadView(options) {
             // Podemos cambiar por parñámetros predefinidos
             var id = typeof options.id === "undefined" ? "app" : options.id;
-            var callback = typeof options.callback === "undefined" ? ()=>{} : options.callback;
+            var callback = typeof options.callback === "undefined" ? () => { } : options.callback;
             google.script.run.withSuccessHandler((html) => {
                 document.getElementById(id).innerHTML = html;
                 typeof options.params === "undefined" ? callback() : callback(options.params);
             })[options.func]();
         }
 
-        function loadSearchView(){
+        function loadSearchView() {
             //Cambiar pestaña activa 
-            loadView({func: "loadSearchView", callback: setDataForSearch});
+            loadView({ func: "loadSearchView", callback: setDataForSearch });
         }
 
-        function loadAddVolunteerView(){
+        function loadAddVolunteerView() {
             //Cambiar pestaña activa 
-            loadView({func: "loadAddVolunteerView"});
+            loadView({ func: "loadAddVolunteerView" });
         }
 
-        function loadEditVolunteerView(){
+        function loadEditVolunteerView() {
             //Cambiar pestaña activa 
-            loadView({func: "loadEditVolunteerView"});
+            loadView({ func: "loadEditVolunteerView" });
         }
 
-        function setDataForSearch(){
+        function setDataForSearch() {
             google.script.run.withSuccessHandler((dataReturned) => {
                 DATA = dataReturned.slice();
             }).getDataForSearch();
         }
 
-        function search(){
-            var searchInput = document.getElementById("searchInput").value;
-            var resultsArray = DATA.filter((row) => {
-                return row[1].indexOf(searchInput) != -1;
+        function search() {
+            var searchInput = document.getElementById("searchInput").value.toString().toLowerCase().trim();
+            var searchWords = searchInput.split(/\s+/);
+            // and condition
+
+            var resultsArray = DATA.filter((volunteer) => {
+
+                if (searchWords.every((word) => {
+                    for (let atribute = 0; atribute < COMPARE_ATRIBUTTES.length; atribute++) {
+                        if (volunteer[COMPARE_ATRIBUTTES[atribute]].toLowerCase().indexOf(word) != -1) return true;
+                    }
+                    return false;
+                })) return true;
+
+                return false;
             });
+
             var searchResultsBox = document.getElementById("searchResults");
             var template = document.getElementById("rowTemplate");
             searchResultsBox.innerHTML = "";
-            resultArray.forEach((volunteer) => {
+            if (searchInput === "") return;
+            resultsArray.forEach((volunteer) => {
                 var row = template.content.cloneNode(true);
-                row.querySelector(".matricula").textContent = volunteer[0];     //volunteer.id;
-                row.querySelector(".nombre").textContent = volunteer[1];        //volunteer.name;
-                row.querySelector(".region").textContent = volunteer[2];        //volunteer.region;
-                row.querySelector(".departamento").textContent = volunteer[3];  //volunteer.department;
-                row.querySelector(".periodo").textContent = volunteer[4];       //volunteer.period;
-                row.querySelector(".proyecto").textContent = volunteer[5];      //volunteer.project;
-                row.querySelector(".campus").textContent = volunteer[6];        //volunteer.campus;
+                for (let atribute = 0; atribute < COMPARE_ATRIBUTTES.length; atribute++) {
+                    // Case sensitive?
+                    row.querySelector("." + COMPARE_ATRIBUTTES[atribute]).textContent = volunteer[COMPARE_ATRIBUTTES[atribute]];
+                }
                 searchResultsBox.appendChild(row);
             });
         }
 
-        function inputEventHandler(event){
-            if (event.target.matches("searchInput")) search();
+        function inputEventHandler(event) {
+            if (event.target.matches("#searchInput")) search();
         }
 
         document.getElementById("search-link").addEventListener("click", loadSearchView);
         document.getElementById("add-link").addEventListener("click", loadAddVolunteerView);
         document.getElementById("edit-link").addEventListener("click", loadEditVolunteerView);
-        document.getElementById("app").addEventListener("input",inputEventHandler);
+        document.getElementById("app").addEventListener("input", inputEventHandler);
     </script>
 </body>
 
