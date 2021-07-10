@@ -1,4 +1,5 @@
 const TIME_ZONE = "America/Mexico_City"; //Ver los formatos de las zonas horarias en https://developers.google.com/adwords/api/docs/appendix/codes-formats#expandable-22
+var WORKSHEET = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Voluntarios");
 
 function loadMainForm() {
     const htmlServ = HtmlService.createTemplateFromFile("main");
@@ -21,24 +22,55 @@ function requestView(view){
 }
 
 function getDataForSearch() {
-    const workSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Voluntarios");
-    return workSheet.getRange(2, 1, workSheet.getLastRow() - 1, 17).getValues().map((row) => {
-        return new Volunteer(
-            _id         =   row[5],
-            _name       =   row[4],
-            _region     =   row[2],
-            _department =   row[11],
-            _period     =   row[3],
-            _project    =   row[12],
-            _campus     =   row[10],
-            _timeStamp  =   Utilities.formatDate(row[0], TIME_ZONE, 'MMMM dd, yyyy 12:00:00 Z')
-        );
+    return WORKSHEET.getRange(2, 1, WORKSHEET.getLastRow() - 1, 17).getValues().map((row) => {
+        return {
+            id         :   row[5],
+            name       :   row[4],
+            region     :   row[2],
+            department :   row[11],
+            period     :   row[3],
+            project    :   row[12],
+            campus     :   row[10],
+            timeStamp  :   Utilities.formatDate(row[0], TIME_ZONE, 'MMMM dd, yyyy 12:00:00 Z')
+        };
     });
 }
 
-function deleteVolunteer(timeStamp){
-    const workSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Voluntarios");
-    const timeStampColumn = workSheet.getRange(2, 1, workSheet.getLastRow() - 1, 1).getValues().map((row) => {return Utilities.formatDate(row[0], TIME_ZONE, 'MMMM dd, yyyy 12:00:00 Z')});
-    rowPosition = timeStampColumn.indexOf(timeStamp) + 2;
-    workSheet.deleteRow(rowPosition === 1 ? 0 : rowPosition);
+function getVolunteerRow(timeStamp){
+    const timeStampColumn = WORKSHEET.getRange(2, 1, WORKSHEET.getLastRow() - 1, 1).getValues();
+    for (let row = 0; row < timeStampColumn.length; row++){ // Este tipo de for sirve para tener el índice de inmediato.
+        if (Utilities.formatDate(timeStampColumn[row][0], TIME_ZONE, 'MMMM dd, yyyy 12:00:00 Z') === timeStamp){
+            return row + 2; //Las filas en la hoja empiezan en el indice 1. La primera fila es de títulos.
+        }
+    }
+    return 0;
 }
+
+function deleteVolunteer(timeStamp){
+    WORKSHEET.deleteRow(getVolunteerRow(timeStamp));
+}
+
+function getFullVolunteer(timeStamp){
+    volunteer = WORKSHEET.getRange(getVolunteerRow(timeStamp), 1, 1, 17).getValues()[0];
+    return {
+        timeStamp           :   Utilities.formatDate(volunteer[0], TIME_ZONE, 'MMMM dd, yyyy 12:00:00 Z'),
+        ingressType         :   volunteer[1],
+        region              :   volunteer[2],
+        period              :   volunteer[3],
+        name                :   volunteer[4],
+        id                  :   volunteer[5],
+        institutionalEmail  :   volunteer[6],
+        personalEmail       :   volunteer[7],
+        whatsApp            :   volunteer[8],
+        career              :   volunteer[9],
+        campus              :   volunteer[10],
+        department          :   volunteer[11],
+        project             :   volunteer[12],
+        talent              :   volunteer[13],
+        hours               :   volunteer[14],
+        CAG                 :   volunteer[15],
+        folderLink          :   volunteer[16]
+    };
+}
+
+

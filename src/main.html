@@ -21,12 +21,9 @@
 
     <div class="container">
         <ul class="nav nav-tabs">
-            <!-- podemos cambiar a botones-->
+            <!-- podemos cambiar a botones y ya no usar Event Listeners-->
             <li class="nav-item">
-                <div class="nav-link active" id="edit-link">Home</div>
-            </li>
-            <li class="nav-item">
-                <div class="nav-link" id="search-link">Buscar</div>
+                <div class="nav-link active" id="search-link">Buscar</div>
             </li>
             <li class="nav-item">
                 <div class="nav-link" id="add-link">Añadir</div>
@@ -43,8 +40,8 @@
         crossorigin="anonymous"></script>
 
     <script>
-
-        const COMPARE_ATRIBUTTES = ["id", "name", "region", "department", "period", "project", "campus"];
+        const ALL_ATTRIBUTES = ["ingressType", "region", "period", "name", "id", "institutionalEmail", "personalEmail", "whatsApp", "career", "campus", "department", "project", "talent", "hours", "CAG"]; //except: timeStamp, folderLink
+        const COMPARE_ATTRIBUTES = ["id", "name", "region", "department", "period", "project", "campus"];
         var DATA;
 
         function loadView(view, id = "app") {
@@ -54,7 +51,7 @@
         }
 
         function loadSearchView() {
-            //Cambiar pestaña activa 
+            //Cambiar pestaña activa, animación de carga.
             loadView("search");
             google.script.run.withSuccessHandler((dataReturned) => {
                 DATA = dataReturned.slice();
@@ -62,13 +59,19 @@
         }
 
         function loadAddVolunteerView() {
-            //Cambiar pestaña activa 
+            //Cambiar pestaña activa, animación de carga.
             loadView("add");
         }
 
-        function loadEditVolunteerView() {
-            //Cambiar pestaña activa 
+        function loadEditVolunteerView(event) {
+            //Cambiar pestaña activa, animación de carga.
             loadView("edit");
+            google.script.run.withSuccessHandler((volunteer)=>{
+                for (let atribute = 0; atribute < ALL_ATTRIBUTES.length - 1; atribute++) { //omitimos el atributo CAG porque es una checkbox
+                    document.getElementById(ALL_ATTRIBUTES[atribute]).value = volunteer[ALL_ATTRIBUTES[atribute]];
+                }
+                document.getElementById("CAG").checked = volunteer.CAG;
+            }).getFullVolunteer(event.target.dataset.volunteerTimeStamp);
         }
 
         function search() {
@@ -79,33 +82,33 @@
 
             var searchWords = searchInput.split(/\s+/);
             const template = document.getElementById("rowTemplate");
-            
+
             DATA.forEach((volunteer) => {
                 if (searchWords.every((word) => { //and condition, no Case sesitive
-                    for (let atribute = 0; atribute < COMPARE_ATRIBUTTES.length; atribute++) {
-                        if (volunteer[COMPARE_ATRIBUTTES[atribute]].toLowerCase().indexOf(word) != -1) return true;
+                    for (let atribute = 0; atribute < COMPARE_ATTRIBUTES.length; atribute++) {
+                        if (volunteer[COMPARE_ATTRIBUTES[atribute]].toLowerCase().indexOf(word) != -1) return true;
                     }
                     return false;
-                })){
+                })) {
                     var row = template.content.cloneNode(true);
                     row.querySelector(".confirm-button").dataset.volunteerTimeStamp = volunteer.timeStamp;
                     row.querySelector(".edit-button").dataset.volunteerTimeStamp = volunteer.timeStamp;
-                    for (let atribute = 0; atribute < COMPARE_ATRIBUTTES.length; atribute++) {
-                        row.querySelector("." + COMPARE_ATRIBUTTES[atribute]).textContent = volunteer[COMPARE_ATRIBUTTES[atribute]];
+                    for (let atribute = 0; atribute < COMPARE_ATTRIBUTES.length; atribute++) {
+                        row.querySelector("." + COMPARE_ATTRIBUTES[atribute]).textContent = volunteer[COMPARE_ATTRIBUTES[atribute]];
                     }
                     searchResultsBox.appendChild(row);
                 }
             });
         }
 
-        function displayConfirmation(event){
+        function displayConfirmation(event) {
             //orden en html: "confirmar", "-eliminar-", "cancelar"
             event.target.previousElementSibling.classList.remove("d-none"); //show confirm button
             event.target.nextElementSibling.classList.remove("d-none"); //show cancel button
             event.target.classList.add("d-none"); //hide delete button
         }
 
-        function hideConfirmation(event){
+        function hideConfirmation(event) {
             //orden en html: "confirmar", "eliminar", "-cancelar-"
             event.target.previousElementSibling.classList.remove("d-none"); //show delete button
             event.target.previousElementSibling.previousElementSibling.classList.add("d-none"); //hide confirm button
@@ -116,9 +119,9 @@
             const timeStamp = event.target.dataset.volunteerTimeStamp;
             google.script.run.withSuccessHandler(() => {
                 event.target.closest(".result-box").remove();
-                for (let volunteer = 0; volunteer < DATA.length; volunteer++){
-                    if (timeStamp === DATA[volunteer].timeStamp){
-                        DATA.splice(volunteer,1);
+                for (let volunteer = 0; volunteer < DATA.length; volunteer++) {
+                    if (timeStamp === DATA[volunteer].timeStamp) {
+                        DATA.splice(volunteer, 1);
                         break;
                     }
                 }
@@ -130,12 +133,11 @@
             if (event.target.matches(".delete-button")) displayConfirmation(event);
             if (event.target.matches(".confirm-button")) deleteVolunteer(event);
             if (event.target.matches(".cancel-button")) hideConfirmation(event);
-            if (event.target.matches(".edit-button")) loadEditVolunteerView();
+            if (event.target.matches(".edit-button")) loadEditVolunteerView(event);
         }
 
         document.getElementById("search-link").addEventListener("click", loadSearchView);
         document.getElementById("add-link").addEventListener("click", loadAddVolunteerView);
-        document.getElementById("edit-link").addEventListener("click", loadEditVolunteerView);
         document.getElementById("app").addEventListener("input", inputEventHandler);
         document.getElementById("app").addEventListener("click", inputEventHandler);
     </script>
