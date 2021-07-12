@@ -14,7 +14,7 @@
     <div class="input-group mb-3">
         <label class="input-group-text" for="region">Región</label>
         <select class="form-select" id="region">
-            <option></option>
+            <option>Tampico, Madero y Altamira</option>
         </select>
     </div>
 
@@ -59,28 +59,28 @@
     <div class="input-group mb-3">
         <label class="input-group-text" for="department">Departamento</label>
         <select class="form-select" id="department">
-            <option></option>
+            <option>General</option>
         </select>
     </div>
 
     <div class="input-group mb-3">
         <label class="input-group-text" for="period">Período</label>
         <select class="form-select" id="period">
-            <option></option>
+            <option>2021-II</option>
         </select>
     </div>
 
     <div class="input-group mb-3">
         <label class="input-group-text" for="project">Proyecto a inscribir</label>
         <select class="form-select" id="project">
-            <option></option>
+            <option>PWD</option>
         </select>
     </div>
 
     <div class="input-group mb-3">
         <label class="input-group-text" for="talent">Talento a impartir</label>
-        <select class="form-select" id="talent" disabled>
-            <option></option>
+        <select class="form-select" id="talent">
+            <option selected>prueba</option>
         </select>
     </div>
 
@@ -102,6 +102,12 @@
         <label class="form-check-label" for="CAG">Candidato a graduar</label>
     </div>
 
-    <button class="btn btn-primary" id="guardar">Guardar Cambios</button>
-    <button class="btn btn-secondary" id="guardar">Cancelar</button>
+    <div class="alert alert-success invisible" role="alert" id = "success-notification">
+        ✅ Cambios guardados.
+    </div>
+    <button class="btn btn-primary" id="save-button">
+        <span class="spinner-grow spinner-grow-sm d-none" role="status" id="loadingbox"></span>
+        Guardar cambios
+    </button>
+    <button class="btn btn-secondary" id="back-button">Regresar</button>
 </div>

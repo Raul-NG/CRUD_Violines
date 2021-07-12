@@ -31,7 +31,7 @@ function getDataForSearch() {
             period     :   row[3],
             project    :   row[12],
             campus     :   row[10],
-            timeStamp  :   Utilities.formatDate(row[0], TIME_ZONE, 'MMMM dd, yyyy 12:00:00 Z')
+            timeStamp  :   Utilities.formatDate(row[0], TIME_ZONE, 'MMMM dd, yyyy HH:mm:ss Z')
         };
     });
 }
@@ -39,7 +39,7 @@ function getDataForSearch() {
 function getVolunteerRow(timeStamp){
     const timeStampColumn = WORKSHEET.getRange(2, 1, WORKSHEET.getLastRow() - 1, 1).getValues();
     for (let row = 0; row < timeStampColumn.length; row++){ // Este tipo de for sirve para tener el índice de inmediato.
-        if (Utilities.formatDate(timeStampColumn[row][0], TIME_ZONE, 'MMMM dd, yyyy 12:00:00 Z') === timeStamp){
+        if (Utilities.formatDate(timeStampColumn[row][0], TIME_ZONE, 'MMMM dd, yyyy HH:mm:ss Z') === timeStamp){
             return row + 2; //Las filas en la hoja empiezan en el indice 1. La primera fila es de títulos.
         }
     }
@@ -53,7 +53,7 @@ function deleteVolunteer(timeStamp){
 function getFullVolunteer(timeStamp){
     volunteer = WORKSHEET.getRange(getVolunteerRow(timeStamp), 1, 1, 17).getValues()[0];
     return {
-        timeStamp           :   Utilities.formatDate(volunteer[0], TIME_ZONE, 'MMMM dd, yyyy 12:00:00 Z'),
+        timeStamp           :   Utilities.formatDate(volunteer[0], TIME_ZONE, 'MMMM dd, yyyy HH:mm:ss Z'),
         ingressType         :   volunteer[1],
         region              :   volunteer[2],
         period              :   volunteer[3],
@@ -73,4 +73,23 @@ function getFullVolunteer(timeStamp){
     };
 }
 
+function updateVolunteer(volunteer){
+    WORKSHEET.getRange(getVolunteerRow(volunteer.timeStamp), 2/*se salta la columna de timeStamp*/, 1, 16).setValues(
+        [[volunteer.ingressType,
+        volunteer.region,
+        volunteer.period,
+        volunteer.name,
+        volunteer.id,
+        volunteer.institutionalEmail,
+        volunteer.personalEmail,
+        volunteer.whatsApp,
+        volunteer.career,
+        volunteer.campus,
+        volunteer.department,
+        volunteer.project,
+        volunteer.talent,
+        volunteer.hours,
+        volunteer.CAG,
+        volunteer.folderLink]]);
+}
 

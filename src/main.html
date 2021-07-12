@@ -29,6 +29,13 @@
                 <div class="nav-link" id="add-link">Añadir</div>
             </li>
         </ul>
+
+        <div class="d-flex justify-content-center d-none" id="spinner">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
         <div id="app"></div>
     </div>
 
@@ -44,8 +51,12 @@
         const COMPARE_ATTRIBUTES = ["id", "name", "region", "department", "period", "project", "campus"];
         var DATA;
 
+        loadSearchView();
+
         function loadView(view, id = "app") {
+            document.getElementById("spinner").classList.remove("d-none");
             google.script.run.withSuccessHandler((html) => {
+                document.getElementById("spinner").classList.add("d-none");
                 document.getElementById(id).innerHTML = html;
             }).requestView(view);
         }
@@ -66,11 +77,14 @@
         function loadEditVolunteerView(event) {
             //Cambiar pestaña activa, animación de carga.
             loadView("edit");
-            google.script.run.withSuccessHandler((volunteer)=>{
+            google.script.run.withSuccessHandler((volunteer) => {
                 for (let atribute = 0; atribute < ALL_ATTRIBUTES.length - 1; atribute++) { //omitimos el atributo CAG porque es una checkbox
                     document.getElementById(ALL_ATTRIBUTES[atribute]).value = volunteer[ALL_ATTRIBUTES[atribute]];
                 }
                 document.getElementById("CAG").checked = volunteer.CAG;
+                document.getElementById("save-button").dataset.timeStamp = volunteer.timeStamp;
+                console.log("86",volunteer);
+                console.log("87",document.getElementById("save-button").dataset.volunteer);
             }).getFullVolunteer(event.target.dataset.volunteerTimeStamp);
         }
 
@@ -128,12 +142,33 @@
             }).deleteVolunteer(timeStamp);
         }
 
+        function editVolunteer(_timeStamp) {
+            var volunteer = {timeStamp: _timeStamp}
+            for (let atribute = 0; atribute < ALL_ATTRIBUTES.length - 1; atribute++) { //omitimos el atributo CAG porque es una checkbox
+                volunteer[ALL_ATTRIBUTES[atribute]] = document.getElementById(ALL_ATTRIBUTES[atribute]).value;
+            }
+            document.getElementById("loadingbox").classList.remove("d-none");
+            volunteer.CAG = document.getElementById("CAG").checked;
+            console.log("152",volunteer.timeStamp);
+            console.log("153",volunteer);
+            google.script.run.withSuccessHandler(() => {
+                document.getElementById("loadingbox").classList.add("d-none");
+                document.getElementById("success-notification").classList.remove("invisible");
+                setTimeout(() => { document.getElementById("success-notification").classList.remove("invisible"); }, 2000);
+            }).updateVolunteer(volunteer);
+
+        }
+
         function inputEventHandler(event) {
             if (event.target.matches("#searchInput")) search();
+
             if (event.target.matches(".delete-button")) displayConfirmation(event);
             if (event.target.matches(".confirm-button")) deleteVolunteer(event);
             if (event.target.matches(".cancel-button")) hideConfirmation(event);
+
             if (event.target.matches(".edit-button")) loadEditVolunteerView(event);
+            if (event.target.matches("#save-button")) editVolunteer(event.target.dataset.timeStamp);
+            if (event.target.matches("#back-button")) loadSearchView();
         }
 
         document.getElementById("search-link").addEventListener("click", loadSearchView);
